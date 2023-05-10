@@ -3,7 +3,9 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-    memo: Option<String>,
+    /// Save a memo.
+    pub memo: Option<String>,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -12,7 +14,9 @@ pub struct Cli {
 pub enum Commands {
     /// Get and set options
     Config {
-        token: String,
+        /// Specify the api to save memos.
+        #[arg(long)]
+        api: Option<String>,
         /// List all variables set in config file, along with their values.
         #[arg(short, long)]
         list: bool,

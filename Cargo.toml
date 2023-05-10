@@ -8,3 +8,7 @@ authors = ["Cheng Huang <cheng@duck.com>"]
 
 [dependencies]
 clap = { version = "4.2.7", features = ["derive"] }
+dirs = "5.0.1"
+reqwest = { version = "0.11.17", features = ["blocking", "json"] }
+serde = { version = "1.0.162", features = ["derive"] }
+toml = "0.7.3"
