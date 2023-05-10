@@ -13,15 +13,17 @@ fn main() {
     let _cli = Cli::parse();
     let mut handle: Option<JoinHandle<()>> = None;
 
-    init_config();
+    match init_config() {
+        true => (),
+        false => println!("Failed to init config!"),
+    }
 
     if let Some(memo) = _cli.memo {
         handle = Some(spawn(move || {
-            let response = send(memo.as_str());
-
-            if let Some(link) = response {
-                println!("{}", link);
-            }
+            match send(memo.as_str()) {
+                Ok(link) => println!("{}", link),
+                Err(err) => println!("{}", err),
+            };
         }));
     }
 

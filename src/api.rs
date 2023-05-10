@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::error::Error;
 use reqwest;
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use serde::{Deserialize};
@@ -11,46 +12,47 @@ struct Memo {
 }
 
 #[derive(Deserialize)]
-struct FlomoResponse {
+struct Response {
     code: i32,
     message: String,
     memo: Memo,
 }
 
-pub fn send(memo: &str) -> Option<String> {
-    if let Some(config) = read_config() {
-        if let Some(url) = config.api {
-            let mut headers = HeaderMap::new();
-            headers.append(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+pub fn send(memo: &str) -> Result<String, Box<dyn Error>> {
+    let config = match read_config() {
+        Some(config) => config,
+        None => return Err("Failed to read config!".into()),
+    };
 
-            let mut body = HashMap::new();
-            body.insert("content", memo);
+    let url = match config.api {
+        Some(url) => url,
+        None => return Err("No API URL found!".into()),
+    };
 
-            let client = reqwest::blocking::Client::new();
+    let mut headers = HeaderMap::new();
+    headers.append(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
-            let response = match client.post(url).json(&body).send() {
-                Ok(response) => response,
-                Err(err) => panic!("{}", err),
-            };
+    let mut body = HashMap::new();
+    body.insert("content", memo);
 
-            let resp = match response.json::<FlomoResponse>() {
-                Ok(content) => {
-                    if content.code != 0 {
-                        panic!("{}", content.message);
-                    }
+    let response = match reqwest::blocking::Client::new()
+        .post(url)
+        .json(&body)
+        .send() {
+        Ok(response) => response,
+        Err(_) => return Err("Failed to send request!".into()),
+    };
 
-                    content
-                },
-                Err(_) => panic!("Failed to obtain response"),
-            };
+    let resp = match response.json::<Response>() {
+        Ok(resp) => resp,
+        Err(_) => return Err("Failed to parse response!".into()),
+    };
 
-            let id = resp.memo.slug;
-
-            return Some(format!("https://v.flomoapp.com/mine/?memo_id={}", id));
-        }
-
-        return None;
+    if resp.code != 0 {
+        return Err(resp.message.into());
     }
 
-    None
+    let id = resp.memo.slug;
+
+    return Ok(format!("https://v.flomoapp.com/mine/?memo_id={}", id));
 }
