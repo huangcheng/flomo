@@ -1,13 +1,13 @@
-use std::thread::{JoinHandle, spawn};
 use clap::Parser;
+use std::thread::{spawn, JoinHandle};
 
+mod api;
 mod cli;
 mod config;
-mod api;
 
-use cli::{ Cli, Commands } ;
-use config::{ Config, init_config, write_config, read_config_string };
 use api::send;
+use cli::{Cli, Commands};
+use config::{init_config, read_config_string, write_config, Config};
 
 fn main() {
     let _cli = Cli::parse();
@@ -31,23 +31,23 @@ fn main() {
         Some(Commands::Config { api, list }) => {
             match api {
                 Some(api) => {
-                    let config = Config { api: Some(api.to_string()) };
+                    let config = Config {
+                        api: Some(api.to_string()),
+                    };
 
                     write_config(&config);
-                },
+                }
                 None => (),
             }
 
             match list {
-                true => {
-                    match read_config_string() {
-                        Some(content) => println!("{}", content),
-                        None => (),
-                    }
-                }
+                true => match read_config_string() {
+                    Some(content) => println!("{}", content),
+                    None => (),
+                },
                 false => (),
             }
-        },
+        }
         _ => (),
     }
 

@@ -1,7 +1,7 @@
-use std::path::PathBuf;
-use std::fs;
-use serde::{Serialize, Deserialize};
 use dirs;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
 
 const CONFIG_FILE_NAME: &'static str = ".flomo";
 
@@ -23,7 +23,7 @@ pub fn init_config() -> bool {
                 return match fs::write(file, "") {
                     Ok(_) => true,
                     Err(_) => false,
-                }
+                };
             }
 
             true

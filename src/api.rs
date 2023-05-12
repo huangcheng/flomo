@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use std::error::Error;
 use reqwest;
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
-use serde::{Deserialize};
+use serde::Deserialize;
+use std::collections::HashMap;
+use std::error::Error;
 
 use crate::config::read_config;
 
@@ -38,7 +38,8 @@ pub fn send(memo: &str) -> Result<String, Box<dyn Error>> {
     let response = match reqwest::blocking::Client::new()
         .post(url)
         .json(&body)
-        .send() {
+        .send()
+    {
         Ok(response) => response,
         Err(_) => return Err("Failed to send request!".into()),
     };
